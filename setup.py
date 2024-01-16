@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='regresseasy',
-    version='0.2',
+    version='0.4',
     packages=find_packages(),
     description='Regression Model Performances',
     long_description=description,

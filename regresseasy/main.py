@@ -59,7 +59,7 @@ def RegModelling(X_train, y_train, X_test, y_test):
         scoretest = train_model.score(X_test, y_test)
         Score_Test.append(scoretest)
 
-        rmse = np.sqrt(metrics.mean_squared_error(y_test, y_pred)) / (max(y_test) - min(y_test))
+        rmse = np.sqrt(metrics.mean_squared_error(y_test, y_pred))
         RMSE.append(rmse)
 
         mse = metrics.mean_squared_error(y_test, y_pred)
@@ -81,8 +81,10 @@ def RegModelling(X_train, y_train, X_test, y_test):
     print_scores("MAE", regg_models, MAE)
     print_scores("Cross Validation Score", regg_models, mean)
 
-def print_scores(metric_name, models, scores):
-    print(f"            {metric_name} \n")
-    for i, model in enumerate(models):
-        print(model.__class__.__name__, ':', scores[i])
-    print('-' * 60, '\n')
+    def print_scores(metric_name, models, scores):
+        print(f"            {metric_name} \n")
+        for i, model in enumerate(models):
+            print(model.__class__.__name__, ':', scores[i])
+        print('-' * 60, '\n')
+
+
