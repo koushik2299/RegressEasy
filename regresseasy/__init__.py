@@ -1,1 +1,1 @@
-from .main import RegModelling
+from .main import reg_modelling

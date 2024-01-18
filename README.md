@@ -20,7 +20,7 @@ pip install regressmodel
 Here is a simple example of how to use RegressModel:
 
 ```bash
-from regressmodel.core import RegModelling
+from regresseasy import reg_modelling
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -32,8 +32,13 @@ y = df['target_column']
 # Splitting the dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# Using RegressModel
-results = RegModelling(X_train, y_train, X_test, y_test)
+# Example usage of the function
+# Ensure that you have defined X_train, y_train, X_test, y_test before calling this function
+model_results = reg_modelling(X_train, y_train, X_test, y_test)
+
+# # Access specific model results, e.g., Linear Regression
+print("Linear Regression Results:", model_results["LinearRegression"])
+
 
 # The results variable will contain performance metrics of the models
 ```

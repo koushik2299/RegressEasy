@@ -68,7 +68,7 @@ def reg_modelling(X_train, y_train, X_test, y_test):
 
 # Example usage of the function
 # Ensure that you have defined X_train, y_train, X_test, y_test before calling this function
-model_results = reg_modelling(X_train, y_train, X_test, y_test)
+# model_results = reg_modelling(X_train, y_train, X_test, y_test)
 
-# Access specific model results, e.g., Linear Regression
-print("Linear Regression Results:", model_results["LinearRegression"])
+# # Access specific model results, e.g., Linear Regression
+# print("Linear Regression Results:", model_results["LinearRegression"])
