@@ -1,90 +1,74 @@
 import numpy as np
 import pandas as pd
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
-from sklearn.svm import SVR
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.tree import DecisionTreeRegressor
 import xgboost as xgb
-from sklearn.metrics import r2_score, make_scorer
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import cross_val_score
-from sklearn import metrics
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-def RegModelling(X_train, y_train, X_test, y_test):
-    # Initialize lists for metrics
-    R2_score = []
-    Score_Train = []
-    Score_Test = []
-    RMSE = []
-    MAE = []
-    MSE = []
-    mean = []
-    std = []
-
-    # List of regression models
-    regg_models = [
+def reg_modelling(X_train, y_train, X_test, y_test):
+    models = [
         LinearRegression(), 
         Lasso(), 
-        Ridge(), 
-        SVR(),
+        Ridge(),
         RandomForestRegressor(), 
         DecisionTreeRegressor(), 
         xgb.XGBRegressor()
     ]
 
-    # Dictionaries for storing scores
-    R2_score_dict = {}
-    RMSE_score_dict = {}
-    MAE_score_dict = {}
-    MSE_score_dict = {}
-    Score_Train__dict = {}
-    Score_Test__dict = {}
-    Cross_Valication_score_dict = {}
+    results = {}
 
-    for model in regg_models:    
-        # Train model
-        train_model = model.fit(X_train, y_train)
-        y_pred = train_model.predict(X_test)
+    for model in models:
+        model_name = model.__class__.__name__
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-        # Compute metrics
-        r2score = metrics.r2_score(y_test, y_pred)
-        R2_score.append(r2score)
+        model_results = {
+            "R2 Score": r2_score(y_test, y_pred),
+            "Train Score": model.score(X_train, y_train),
+            "Test Score": model.score(X_test, y_test),
+            "RMSE": np.sqrt(mean_squared_error(y_test, y_pred)),
+            "MSE": mean_squared_error(y_test, y_pred),
+            "MAE": mean_absolute_error(y_test, y_pred),
+            "CV Mean Score": np.mean(cross_val_score(model, X_train, y_train, cv=5, scoring='r2')),
+            "CV Std Deviation": np.std(cross_val_score(model, X_train, y_train, cv=5, scoring='r2'))
+        }
 
-        scoretrain = train_model.score(X_train, y_train)
-        Score_Train.append(scoretrain)
+        results[model_name] = model_results
 
-        scoretest = train_model.score(X_test, y_test)
-        Score_Test.append(scoretest)
+        # Print results for each model
+        print(f"Results for {model_name}:")
+        for key, value in model_results.items():
+            print(f"  {key}: {value:.4f}")
+        print("-" * 40)
 
-        rmse = np.sqrt(metrics.mean_squared_error(y_test, y_pred))
-        RMSE.append(rmse)
+    # Plotting R2 scores with specified modifications
+    r2_scores = {model: result["R2 Score"] for model, result in results.items()}
+    sorted_models = dict(sorted(r2_scores.items(), key=lambda item: item[1], reverse=True))
 
-        mse = metrics.mean_squared_error(y_test, y_pred)
-        MSE.append(mse)
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(sorted_models.keys(), sorted_models.values(), color=sns.color_palette("viridis", len(sorted_models)))
+    plt.xlabel('Models')
+    plt.ylabel('R2 Score')
+    plt.title('R2 Scores of Models in Descending Order')
+    plt.xticks(rotation=45)
+    plt.ylim([0.5, 1])  # Setting the Y-axis scale to start from 0.5
 
-        mae = metrics.mean_absolute_error(y_test, y_pred)
-        MAE.append(mae)
+    # Adding annotations
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 4), ha='center', va='bottom')
 
-        cvs = cross_val_score(model, X_train, y_train, cv=5, scoring=make_scorer(r2_score))
-        mean.append(np.mean(cvs))
-        std.append(np.std(cvs))
+    plt.show()
 
-    # Print the scores
-    print_scores("r2_score", regg_models, R2_score)
-    print_scores("Score Train", regg_models, Score_Train)
-    print_scores("Score Test", regg_models, Score_Test)
-    print_scores("Normalized RMSE", regg_models, RMSE)
-    print_scores("MSE", regg_models, MSE)
-    print_scores("MAE", regg_models, MAE)
-    print_scores("Cross Validation Score", regg_models, mean)
+    return results
 
-    def print_scores(metric_name, models, scores):
-        print(f"            {metric_name} \n")
-        for i, model in enumerate(models):
-            print(model.__class__.__name__, ':', scores[i])
-        print('-' * 60, '\n')
+# Example usage of the function
+# Ensure that you have defined X_train, y_train, X_test, y_test before calling this function
+model_results = reg_modelling(X_train, y_train, X_test, y_test)
 
-
+# Access specific model results, e.g., Linear Regression
+print("Linear Regression Results:", model_results["LinearRegression"])
